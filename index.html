@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RideNow - Your City Ride</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Configure Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#4c52f7',
+                        'primary-dark': '#1e2030',
+                        'secondary-gray': '#f4f5f8',
+                        'primary-green': '#10b981',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <!-- Inter Font via Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        /* Custom scrollbar styling for the simulated service menu */
+        #service-selector::-webkit-scrollbar {
+            height: 4px;
+        }
+        #service-selector::-webkit-scrollbar-thumb {
+            background-color: rgba(76, 82, 247, 0.5);
+            border-radius: 2px;
+        }
+        #service-selector::-webkit-scrollbar-track {
+            background: #e0e0e0;
+        }
+    </style>
+</head>
+<body class="bg-secondary-gray min-h-screen flex items-center justify-center font-sans p-2">
+
+    <!-- Mobile App Container (Max-width simulates a phone screen) -->
+    <div class="w-full max-w-md h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+
+        <!-- Header -->
+        <header class="p-5 bg-primary-blue text-white shadow-lg flex justify-between items-center">
+            <button class="text-white hover:text-opacity-80 transition" onclick="app.uiController.showMenu()">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+            <h1 class="text-xl font-bold tracking-tight">RideNow</h1>
+            <button class="text-white hover:text-opacity-80 transition" onclick="app.uiController.toggleProfile()">
+                <i data-lucide="user-circle" class="w-7 h-7"></i>
+            </button>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow flex flex-col relative">
+
+            <!-- Map Placeholder (Takes up most of the space) -->
+            <div id="map-area" class="h-full bg-gray-200 flex items-center justify-center text-gray-500 relative">
+                <p class="text-center text-sm p-4">
+                    
+                    <br>
+                    Live Map View Simulated
+                </p>
+                <!-- Current Location Marker -->
+                <div class="absolute bottom-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <div class="w-4 h-4 bg-primary-blue rounded-full ring-4 ring-primary-blue ring-opacity-50"></div>
+                </div>
+            </div>
+
+            <!-- Booking/Search Card (Overlays the map at the bottom) -->
+            <div class="absolute bottom-0 w-full p-4">
+                <div class="bg-white rounded-2xl shadow-xl p-4 md:p-6 transition-all duration-300">
+                    
+                    <!-- Service Selector Tabs -->
+                    <div id="service-selector" class="flex overflow-x-auto space-x-3 mb-4 border-b pb-2">
+                        <!-- Car -->
+                        <button data-service="Car" class="service-tab flex items-center px-4 py-2 rounded-full font-semibold text-sm transition-colors duration-200 selected whitespace-nowrap" onclick="app.uiController.selectService(this)">
+                            <i data-lucide="car" class="w-4 h-4 mr-2"></i> Car
+                        </button>
+                        <!-- Bike Service -->
+                        <button data-service="Bike" class="service-tab flex items-center px-4 py-2 rounded-full font-semibold text-sm transition-colors duration-200 whitespace-nowrap" onclick="app.uiController.selectService(this)">
+                            <i data-lucide="bike" class="w-4 h-4 mr-2"></i> Bike
+                        </button>
+                        <!-- Auto Service (Icon changed to minibus for differentiation) -->
+                        <button data-service="Auto" class="service-tab flex items-center px-4 py-2 rounded-full font-semibold text-sm transition-colors duration-200 whitespace-nowrap" onclick="app.uiController.selectService(this)">
+                            <i data-lucide="minibus" class="w-4 h-4 mr-2"></i> Auto
+                        </button>
+                        <!-- NEW Bus Service -->
+                        <button data-service="Bus" class="service-tab flex items-center px-4 py-2 rounded-full font-semibold text-sm transition-colors duration-200 whitespace-nowrap" onclick="app.uiController.selectService(this)">
+                            <i data-lucide="bus" class="w-4 h-4 mr-2"></i> Bus
+                        </button>
+                        <!-- Other Services -->
+                        <button data-service="Rental" class="service-tab flex items-center px-4 py-2 rounded-full font-semibold text-sm transition-colors duration-200 whitespace-nowrap" onclick="app.uiController.selectService(this)">
+                            <i data-lucide="clock" class="w-4 h-4 mr-2"></i> Rental
+                        </button>
+                        <button data-service="Package" class="service-tab flex items-center px-4 py-2 rounded-full font-semibold text-sm transition-colors duration-200 whitespace-nowrap" onclick="app.uiController.selectService(this)">
+                            <i data-lucide="package" class="w-4 h-4 mr-2"></i> Package
+                        </button>
+                        <button data-service="Outstation" class="service-tab flex items-center px-4 py-2 rounded-full font-semibold text-sm transition-colors duration-200 whitespace-nowrap" onclick="app.uiController.selectService(this)">
+                            <i data-lucide="route" class="w-4 h-4 mr-2"></i> Outstation
+                        </button>
+                    </div>
+
+                    <!-- Input Fields -->
+                    <div class="space-y-3">
+                        
+                        <!-- Pick-up Input (Now Editable) -->
+                        <div class="flex items-center bg-secondary-gray p-3 rounded-xl shadow-inner transition">
+                            <i data-lucide="dot-circle" class="w-5 h-5 text-green-600 mr-3 flex-shrink-0"></i>
+                            <input type="text" id="pickup-input" placeholder="Enter Pickup Location" class="bg-transparent w-full text-primary-dark font-medium placeholder-gray-500 focus:outline-none" value="123 Main St, Central City" oninput="app.bookingManager.resetQuote()">
+                        </div>
+                        
+                        <!-- Drop-off Input (Now Editable) -->
+                        <div class="flex items-center bg-secondary-gray p-3 rounded-xl shadow-inner transition">
+                            <i data-lucide="map-pin" class="w-5 h-5 text-red-600 mr-3 flex-shrink-0"></i>
+                            <input type="text" id="dropoff-input" placeholder="Enter Destination" class="bg-transparent w-full text-primary-dark placeholder-gray-500 focus:outline-none" oninput="app.bookingManager.resetQuote()">
+                        </div>
+
+                        <!-- NEW: Passenger Selector -->
+                        <div class="flex items-center bg-secondary-gray p-3 rounded-xl shadow-inner transition">
+                            <i data-lucide="users" class="w-5 h-5 text-primary-blue mr-3 flex-shrink-0"></i>
+                            <select id="passenger-count" class="bg-transparent w-full text-primary-dark font-medium focus:outline-none" onchange="app.bookingManager.resetQuote()">
+                                <option value="" disabled selected>Select Number of Passengers</option>
+                                <option value="1">1 Passenger</option>
+                                <option value="2">2 Passengers</option>
+                                <option value="3">3 Passengers</option>
+                                <option value="4">4 Passengers</option>
+                                <option value="5">5 Passengers (Car XL)</option>
+                                <option value="6">6 Passengers (Car XL)</option>
+                                <option value="10">10+ Passengers (Bus/Van)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Price and Details Display (New element) -->
+                    <div id="price-details" class="mt-4 p-3 border border-primary-green/50 bg-primary-green/10 rounded-xl hidden justify-between items-center text-primary-dark">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="tag" class="w-5 h-5 text-primary-green"></i>
+                            <div>
+                                <p class="text-xs text-gray-500">Estimated Fare</p>
+                                <p id="quoted-price" class="text-xl font-bold text-primary-green"></p>
+                            </div>
+                        </div>
+                        <div id="service-info" class="text-right text-sm text-gray-600">
+                            <span id="service-type" class="font-semibold text-primary-dark">Car Standard</span>
+                            <span id="estimated-time" class="block text-xs">Arrives in ~5 mins</span>
+                        </div>
+                    </div>
+
+                    <!-- Search/Book Button -->
+                    <button id="search-button" class="w-full mt-5 py-3 bg-primary-blue text-white font-bold rounded-xl text-lg shadow-lg shadow-primary-blue/50 hover:bg-primary-blue/90 transition-all duration-300 transform active:scale-98 disabled:bg-gray-400" onclick="app.bookingManager.handleBooking()">
+                        Search Car
+                    </button>
+                </div>
+            </div>
+
+            <!-- Message Box (for alerts) -->
+            <div id="message-box" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+                <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full text-center">
+                    <i id="message-icon" data-lucide="check-circle" class="w-10 h-10 text-primary-blue mx-auto mb-3"></i>
+                    <h3 id="message-title" class="text-xl font-bold mb-2"></h3>
+                    <p id="message-text" class="text-gray-600 mb-4"></p>
+                    <button class="bg-primary-blue text-white py-2 px-6 rounded-lg font-semibold hover:bg-primary-blue/90 transition" onclick="app.uiController.hideMessage()">OK</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        /**
+         * The central controller for the Ride Hailing Application.
+         * Manages state and coordinates between the UI and the booking logic.
+         */
+        class RideHailingApp {
+            constructor() {
+                // Application State
+                this.currentService = 'Car';
+                this.isPriceQuoted = false;
+
+                // Dependencies
+                this.uiController = new UIController(this);
+                this.bookingManager = new BookingManager(this);
+
+                this.init();
+            }
+
+            // Initializes the app on DOM load
+            init() {
+                document.addEventListener('DOMContentLoaded', () => {
+                    lucide.createIcons();
+                    // Set the initial selected service tab
+                    this.uiController.selectService(document.querySelector('.service-tab[data-service="Car"]'));
+                });
+            }
+        }
+
+        /**
+         * Manages all interactions with the user interface (DOM manipulation).
+         */
+        class UIController {
+            constructor(appInstance) {
+                this.app = appInstance;
+            }
+
+            /**
+             * Updates the UI to reflect the newly selected service tab.
+             * @param {HTMLElement} element - The button element that was clicked.
+             */
+            selectService(element) {
+                // Update styling for tabs
+                document.querySelectorAll('.service-tab').forEach(tab => {
+                    tab.classList.remove('bg-primary-blue', 'text-white');
+                    tab.classList.add('bg-secondary-gray', 'text-primary-dark', 'hover:bg-gray-300');
+                });
+                element.classList.add('bg-primary-blue', 'text-white');
+                element.classList.remove('bg-secondary-gray', 'text-primary-dark', 'hover:bg-gray-300');
+
+                // Update application state
+                this.app.currentService = element.getAttribute('data-service');
+                
+                // Reset UI elements
+                this.app.bookingManager.resetQuote(); 
+                document.getElementById('passenger-count').value = "";
+                document.getElementById('passenger-count').querySelector('option[disabled]').selected = true;
+
+                // Adjust input placeholder based on service
+                const dropoffInput = document.getElementById('dropoff-input');
+                switch (this.app.currentService) {
+                    case 'Package':
+                        dropoffInput.placeholder = 'Enter Delivery Address';
+                        break;
+                    case 'Rental':
+                        dropoffInput.placeholder = 'Enter Time/Duration (e.g., 4 Hours)';
+                        dropoffInput.value = '4 Hours / 40 km (Mock)';
+                        break;
+                    case 'Outstation':
+                        dropoffInput.placeholder = 'Enter Destination City';
+                        break;
+                    default: // Car, Bike, Auto, Bus
+                        dropoffInput.placeholder = 'Enter Destination';
+                        dropoffInput.value = ''; // Clear destination for standard rides
+                }
+            }
+            
+            /**
+             * Shows a custom message box (used instead of alert()).
+             * @param {string} title - The title of the message.
+             * @param {string} text - The body text of the message.
+             * @param {string} icon - The lucide icon name.
+             */
+            showMessage(title, text, icon) {
+                const messageBox = document.getElementById('message-box');
+                document.getElementById('message-title').textContent = title;
+                document.getElementById('message-text').textContent = text;
+                
+                const messageIcon = document.getElementById('message-icon');
+                messageIcon.setAttribute('data-lucide', icon);
+                lucide.createIcons({ attrs: { 'data-lucide': icon }, container: messageIcon.parentNode });
+                
+                // Set color based on message type
+                if (icon === 'check-circle') {
+                    messageIcon.classList.remove('text-red-500', 'text-gray-500');
+                    messageIcon.classList.add('text-primary-blue');
+                } else if (icon === 'alert-triangle') {
+                    messageIcon.classList.remove('text-primary-blue');
+                    messageIcon.classList.add('text-red-500');
+                } else {
+                    messageIcon.classList.remove('text-primary-blue', 'text-red-500');
+                    messageIcon.classList.add('text-gray-500');
+                }
+
+                messageBox.classList.remove('hidden');
+                messageBox.classList.add('flex');
+            }
+
+            /**
+             * Hides the custom message box.
+             */
+            hideMessage() {
+                document.getElementById('message-box').classList.remove('flex');
+                document.getElementById('message-box').classList.add('hidden');
+            }
+            
+            // Mock functions for header buttons
+            showMenu() {
+                this.showMessage('Menu', 'The side menu would slide out here, showing options like Trips, Wallet, Settings, etc.', 'menu');
+            }
+
+            toggleProfile() {
+                this.showMessage('Profile', 'This would show your profile information and payment methods.', 'user-circle');
+            }
+        }
+
+        /**
+         * Manages the booking process: validation, pricing, and phase transitions.
+         */
+        class BookingManager {
+            constructor(appInstance) {
+                this.app = appInstance;
+                this.passengerCountElement = document.getElementById('passenger-count');
+                this.pickupInput = document.getElementById('pickup-input');
+                this.dropoffInput = document.getElementById('dropoff-input');
+                this.searchButton = document.getElementById('search-button');
+                this.priceDetails = document.getElementById('price-details');
+                this.quotedPriceElement = document.getElementById('quoted-price');
+            }
+
+            /**
+             * Generates a mock price based on the selected service type and passenger count.
+             * @returns {number} The generated price.
+             */
+            calculatePrice() {
+                let basePrice;
+                let range;
+                const passengerCount = parseInt(this.passengerCountElement.value) || 1;
+
+                switch (this.app.currentService) {
+                    case 'Bike':
+                        basePrice = 50; range = 30;
+                        break;
+                    case 'Auto':
+                        basePrice = 80; range = 40;
+                        break;
+                    case 'Car':
+                        // Price increases for 5+ passengers (XL simulation)
+                        basePrice = 150 + (passengerCount > 4 ? 50 : 0); 
+                        range = 70; 
+                        break;
+                    case 'Bus':
+                        basePrice = 20 * passengerCount; 
+                        range = 10; // Per-person base price
+                        break;
+                    case 'Package':
+                        basePrice = 200; range = 100;
+                        break;
+                    case 'Rental':
+                        basePrice = 800; range = 200;
+                        break;
+                    case 'Outstation':
+                        basePrice = 2500; range = 500;
+                        break;
+                    default:
+                        basePrice = 100; range = 50;
+                }
+                
+                let finalPrice = basePrice + Math.floor(Math.random() * range);
+                return finalPrice;
+            }
+
+            /**
+             * Handles the two-step booking logic: Search/Quote Price (Phase 1) -> Confirm Booking (Phase 2).
+             */
+            handleBooking() {
+                const pickupValue = this.pickupInput.value.trim();
+                const dropoffValue = this.dropoffInput.value.trim();
+                const passengerCount = parseInt(this.passengerCountElement.value);
+
+                // --- Validation 1: Inputs ---
+                if (!pickupValue || (!dropoffValue && this.app.currentService !== 'Rental') || !passengerCount) {
+                    this.app.uiController.showMessage(
+                        'Error', 
+                        'Please enter pickup, destination, and passenger count.', 
+                        'alert-triangle'
+                    );
+                    return;
+                }
+
+                // --- Validation 2: Capacity Check (Only for ride services) ---
+                const maxCapacity = { 'Bike': 1, 'Auto': 3, 'Car': 6, 'Rental': 6, 'Outstation': 6 }[this.app.currentService];
+                
+                if (maxCapacity && passengerCount > maxCapacity) {
+                    this.app.uiController.showMessage(
+                        'Capacity Exceeded', 
+                        `The selected service (${this.app.currentService}) has a max capacity of ${maxCapacity} passengers. Please choose a larger vehicle or fewer people.`, 
+                        'alert-triangle'
+                    );
+                    return;
+                }
+
+                // --- Phase 2: Confirm Booking ---
+                if (this.app.isPriceQuoted) {
+                    this.searchButton.textContent = 'Confirming...';
+                    this.searchButton.disabled = true;
+
+                    setTimeout(() => {
+                        this.searchButton.textContent = `Search ${this.app.currentService}`;
+                        this.searchButton.disabled = false;
+                        
+                        this.app.uiController.showMessage(
+                            `${this.app.currentService} Booked! 🎉`,
+                            `Your ride for ${this.quotedPriceElement.textContent} is confirmed for ${passengerCount} ${passengerCount > 1 ? 'people' : 'person'}.`,
+                            'check-circle'
+                        );
+
+                        // Reset UI state after successful booking
+                        this.resetQuote();
+                        this.dropoffInput.value = '';
+
+                    }, 1500);
+                    return;
+                }
+
+                // --- Phase 1: Search and Quote Price ---
+                this.searchButton.textContent = 'Searching...';
+                this.searchButton.disabled = true;
+
+                setTimeout(() => {
+                    const price = this.calculatePrice();
+                    const formattedPrice = `₹${price}`;
+
+                    // Determine service label (e.g., Car Standard vs Car XL)
+                    let serviceLabel = this.app.currentService + ' Standard';
+                    if (this.app.currentService === 'Car' && passengerCount > 4) {
+                        serviceLabel = 'Car XL';
+                    } else if (this.app.currentService === 'Bus') {
+                        serviceLabel = 'Bus Ticket';
+                    }
+
+                    // Update UI elements
+                    this.quotedPriceElement.textContent = formattedPrice;
+                    document.getElementById('service-type').textContent = serviceLabel;
+                    this.priceDetails.classList.remove('hidden');
+                    this.priceDetails.classList.add('flex');
+
+                    // Update button for next phase
+                    this.searchButton.textContent = `Book ${this.app.currentService} (${formattedPrice})`;
+                    this.searchButton.disabled = false;
+                    
+                    this.app.isPriceQuoted = true;
+
+                }, 1500);
+            }
+
+            /**
+             * Resets the price quote display and booking state.
+             */
+            resetQuote() {
+                this.app.isPriceQuoted = false;
+                this.priceDetails.classList.add('hidden');
+                this.priceDetails.classList.remove('flex');
+                this.searchButton.textContent = `Search ${this.app.currentService}`;
+            }
+        }
+
+        // Initialize the application globally once the window loads
+        let app; 
+        window.onload = () => {
+            app = new RideHailingApp();
+        };
+        
+    </script>
+</body>
+</html>
